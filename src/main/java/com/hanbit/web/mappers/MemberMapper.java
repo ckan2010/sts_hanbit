@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
+import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
 @Repository
 public interface MemberMapper {
@@ -12,7 +13,7 @@ public interface MemberMapper {
 	public int update(MemberDTO stu);
 	public int delete(String id);
 	public List<MemberDTO> list();
-	public MemberDTO findById(String pk);
+	public MemberDTO findOne(Command command);
 	public List<?> findByName(String name);
 	public int count();
 	public boolean login(MemberDTO param);

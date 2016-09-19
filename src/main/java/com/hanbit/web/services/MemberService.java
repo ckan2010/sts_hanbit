@@ -3,6 +3,7 @@
  */
 package com.hanbit.web.services;
 
+import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
 import com.hanbit.web.util.CommonService;
 
@@ -17,7 +18,7 @@ public interface MemberService extends CommonService{
 	public MemberDTO show();
 	public void update(MemberDTO stu);
 	public String delete(String id);
-	public MemberDTO findById(String id);
+	public MemberDTO findOne(Command command);
 	public int genderCount(String gender);
 	public MemberDTO login(MemberDTO member);
 	public int findId(String id);

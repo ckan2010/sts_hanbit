@@ -31,7 +31,7 @@ DROP TABLE Exam CASCADE CONSTRAINT;
 
 CREATE TABLE Major(
   major_seq  INT CONSTRAINT major_pk PRIMARY KEY,
-  title      VARCHAR2(100) NOT NULL
+  title      VARCHAR2(100) NOT NULL UNIQUE
 );
 select * from major;
 
@@ -41,11 +41,11 @@ CREATE TABLE Member(
   name        VARCHAR2(20)  NOT NULL,
   gender      VARCHAR2(10)  NOT NULL,
   reg_date    VARCHAR2(20)  NOT NULL,
-  ssn         VARCHAR2(10)  NOT NULL,
+  ssn         VARCHAR2(10)  NOT NULL UNIQUE,
   email       VARCHAR2(30),
   profile_img VARCHAR2(100) DEFAULT 'default.jpg',
   role        VARCHAR2(10)  DEFAULT 'STUDENT',
-  phone       VARCHAR2(13)  NOT NULL,
+  phone       VARCHAR2(13)  NOT NULL UNIQUE,
   major_seq   INT,
   CONSTRAINT gender_ck CHECK (gender IN ('MALE','FEMALE')),
   CONSTRAINT major_member_fk FOREIGN KEY(major_seq)
@@ -69,7 +69,7 @@ from   grade
 
 CREATE TABLE Board(
   art_seq    INT CONSTRAINT board_pk PRIMARY KEY,
-  category   VARCHAR2(20)  NOT NULL,
+  category   VARCHAR2(20)  NOT NULL UNIQUE,
   title      VARCHAR2(30)  DEFAULT 'NO TITLE',
   reg_date   VARCHAR2(20)  NOT NULL,
   content    VARCHAR2(100) DEFAULT 'NO CONTENT',
@@ -83,7 +83,7 @@ from   board
 
 CREATE TABLE Subject(
   subj_seq   INT CONSTRAINT subject_pk PRIMARY KEY,
-  subj_name  VARCHAR2(20)  NOT NULL,
+  subj_name  VARCHAR2(20)  NOT NULL UNIQUE,
   mem_id     VARCHAR2(20)  NOT NULL,
   CONSTRAINT member_subject_fk FOREIGN KEY(mem_id)
 	REFERENCES Member(mem_id) ON DELETE CASCADE
@@ -217,8 +217,9 @@ select *
 from   SYS.user_constraints
 order by table_name,constraint_name
 ;
-SELECT *
+SELECT object_name
 FROM   user_procedures
+order by object_name
 ;
 DROP PROCEDURE insert_exam;
 DROP PROCEDURE HANBIT.INSERTBOARD;
@@ -366,12 +367,12 @@ BEGIN
     UPDATE Major SET title = sp_title WHERE major_seq = sp_major_seq;
 END update_major;
 -- EXC_UPDATE_MAJOR
-BEGIN update_major('예술학부',1006);END;
+BEGIN update_major('예술학부',1007);END;
 -- DEF_DELETE_MAJOR
 CREATE OR REPLACE PROCEDURE delete_major(sp_major_seq IN major.major_seq%TYPE) AS
 BEGIN DELETE FROM  Major WHERE major_seq = sp_major_seq;END delete_major;
 -- EXC_DELETE_MAJOR
-BEGIN delete_major(1006);END;
+BEGIN delete_major(1007);END;
 /*
 ========== MEMBER_PROFESSOR =========
 @AUTHOR : ckan2010@gmail.com
@@ -523,9 +524,87 @@ END insert_student;
 EXEC insert_student('han','1','한효주','FEMALE','2016-07-01','870222-2','han@test.com','han.jpg','STUDENT','010-1234-5678',1000);
 -- DEF_COUNT_STUDENT
 CREATE OR REPLACE PROCEDURE count_student(sp_student_cnt OUT NUMBER) AS
-BEGIN SELECT COUNT(*) INTO sp_student_cnt FROM member u WHERE u.role = 'STUDENT'; END count_student;
+BEGIN SELECT COUNT(*) INTO sp_student_cnt FROM member u WHERE u.role = 'STUDENT'; commit; END count_student;
 -- EXC_COUNT_MEMBER
 DECLARE sp_count NUMBER := 0;BEGIN count_student(sp_count);DBMS_OUTPUT.PUT_LINE('학생 : '||sp_count||' 명');END;
+-- DEF_FIND_BY_STUDENT_ID
+CREATE OR REPLACE PROCEDURE find_by_student_id(
+    sp_student_id      IN member.mem_id%TYPE,
+    sp_student_rec    OUT member%ROWTYPE    
+) AS BEGIN SELECT * INTO sp_student_rec FROM member WHERE mem_id = sp_student_id AND role = 'STUDENT'; commit; END find_by_student_id;
+-- EXC_FIND_BY_STUDENT_ID
+DECLARE
+    sp_mem_id    member.mem_id%TYPE := 'han';
+    sp_student_rec  member%ROWTYPE;
+    sp_mem_cnt   NUMBER := 0;
+BEGIN
+    sp_mem_cnt := exist_member_id(sp_mem_id);
+    IF sp_mem_cnt = 0 THEN
+       DBMS_OUTPUT.PUT_LINE('존재하지 않는 학생 입니다.');
+    ELSE
+       find_by_student_id(sp_mem_id,sp_student_rec);
+        DBMS_OUTPUT.PUT_LINE('멤버 ID : '||sp_student_rec.mem_id||', 비번 : '||sp_student_rec.pw||', 이름 : '||sp_student_rec.name||
+                            ', 성별 : '||sp_student_rec.gender||', 입학일자 : '||sp_student_rec.reg_date||', SSN : '||sp_student_rec.ssn||
+                            ', 이메일 : '||sp_student_rec.email||', 사진 : '||sp_student_rec.profile_img||', 권한 : '||sp_student_rec.role||
+                            ', 전화번호 : '||sp_student_rec.phone||', 전공 SEQ : '||sp_student_rec.major_seq);
+    END IF;    
+END;
+-- DEF_ALL_STUDENT
+CREATE OR REPLACE PROCEDURE all_student(
+    sp_student_cur OUT SYS_REFCURSOR
+) AS
+BEGIN        
+    OPEN sp_student_cur FOR SELECT * FROM member WHERE role = 'STUDENT';
+    commit;
+END all_student;
+-- EXE_ALL_STUDENT
+DECLARE
+    sp_student_cur SYS_REFCURSOR;
+    sp_student_rec member%ROWTYPE;
+BEGIN
+    all_student(sp_student_cur);
+    LOOP 
+    FETCH sp_student_cur 
+    INTO sp_student_rec;
+        EXIT WHEN sp_student_cur%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('멤버 ID : '||sp_student_rec.mem_id||', 비번 : '||sp_student_rec.pw||', 이름 : '||sp_student_rec.name||
+                            ', 성별 : '||sp_student_rec.gender||', 입학일자 : '||sp_student_rec.reg_date||', SSN : '||sp_student_rec.ssn||
+                            ', 이메일 : '||sp_student_rec.email||', 사진 : '||sp_student_rec.profile_img||', 권한 : '||sp_student_rec.role||
+                            ', 전화번호 : '||sp_student_rec.phone||', 전공순서 : '||sp_student_rec.major_seq);
+    END LOOP;
+    CLOSE sp_student_cur;
+END;
+-- DEF_UPDATE_STUDENT
+CREATE OR REPLACE PROCEDURE update_student(
+    sp_student_id    IN member.mem_id%TYPE,
+    sp_student_pw    IN member.pw%TYPE,
+    sp_student_email IN member.email%TYPE,
+    sp_student_phone IN member.phone%TYPE
+)
+AS
+BEGIN    
+    UPDATE Member SET pw = NVL(sp_student_pw,pw),email = NVL(sp_student_email,email),phone = NVL(sp_student_phone,phone) WHERE mem_id = sp_student_id AND role = 'STUDENT';
+    COMMIT;
+END update_student;
+-- EXC_UPDATE_PROF
+DECLARE
+    sp_mem_id    member.mem_id%TYPE := 'han';
+    sp_student_rec  member%ROWTYPE;
+    sp_mem_cnt   NUMBER := 0;
+BEGIN
+    sp_mem_cnt := exist_member_id(sp_mem_id);
+    IF sp_mem_cnt = 0 THEN
+       DBMS_OUTPUT.PUT_LINE('존재하지 않는 학생 입니다.');
+    ELSE
+       update_student('han',2,null,null);
+        DBMS_OUTPUT.PUT_LINE('학생 정보 수정 완료');
+    END IF;    
+END;
+-- DEF_DELETE_STUDENT
+CREATE OR REPLACE PROCEDURE delete_student(sp_student_id IN member.mem_id%TYPE) AS
+BEGIN DELETE FROM  Member WHERE mem_id = sp_student_id AND role = 'STUDENT'; COMMIT; END delete_student;
+-- EXC_DELETE_MAJOR
+BEGIN delete_prof('prof_james');END;
 /*
 ========== EXAM =========
 @AUTHOR : ckan2010@gmail.com
@@ -709,3 +788,13 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE(sp_result);
     END LOOP;    
 END; 
+
+ALTER TABLE MAJOR MODIFY TITLE VARCHAR2(20) UNIQUE;
+
+ALTER TABLE Member MODIFY ssn VARCHAR2(10) UNIQUE;
+
+ALTER TABLE Member MODIFY phone VARCHAR2(13) UNIQUE;
+
+ALTER TABLE Board MODIFY category VARCHAR2(10) UNIQUE;
+
+ALTER TABLE Subject MODIFY subj_name VARCHAR2(20) UNIQUE;

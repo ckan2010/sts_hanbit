@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.hanbit.web.controllers.MemberController;
+import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
 import com.hanbit.web.domains.SubjectDTO;
 import com.hanbit.web.mappers.MemberMapper;
@@ -20,6 +21,7 @@ public class MemberServiceImpl implements MemberService{
 	@Autowired private SqlSession sqlSession;
 	@Autowired private MemberDTO member;
 	@Autowired private SubjectDTO subject;
+	@Autowired Command command;
 	MemberServiceImpl() {
 		
 	}
@@ -77,10 +79,9 @@ public class MemberServiceImpl implements MemberService{
 		return null;
 	}
 	@Override
-	public MemberDTO findById(String id) {
+	public MemberDTO findOne(Command command) {
 		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
-		// TODO Auto-generated method stub	
-		return mapper.findById(id);
+		return mapper.findOne(command);
 	}
 	@Override
 	public int genderCount(String gender) {
@@ -101,7 +102,7 @@ public class MemberServiceImpl implements MemberService{
 	public MemberDTO login(MemberDTO member) {
 		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
 		logger.info("MemberService login ID = {}",member.getId());
-		MemberDTO mem = this.findById(member.getId());
+		MemberDTO mem = this.findOne(command);
 		if (member.getPw().equals(mem.getPw())) {
 			logger.info("MemberService LOGIN IS {}","SUCCESS");
 			return mem;
