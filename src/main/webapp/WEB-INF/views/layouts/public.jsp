@@ -17,6 +17,13 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="${css}/application.css" />
+	<link rel="stylesheet" type="text/css" href="${css}/normalize.css">
+	<link rel="stylesheet" type="text/css" href="${css}/application.css">
+	<link rel="stylesheet" type="text/css" href="${css}/owl.css">
+	<link rel="stylesheet" type="text/css" href="${css}/animate.css">
+	<link rel="stylesheet" type="text/css" href="${css}/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="${css}/et-icons.css">
+	<link rel="stylesheet" type="text/css" href="${css}/cardio.css">
   </head>
   <body>
       <header>
