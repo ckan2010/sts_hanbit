@@ -20,16 +20,16 @@
   </head>
   <body>
       <header>
-        <div>
+        <div id= "pub_header">
           <tiles:insertAttribute name="header" />
         </div>
       </header>
         <section>
-        <article>	
+        <article id="pub_article">	
           <tiles:insertAttribute name="body" />
           </article>
         </section>
-      <footer>
+      <footer id="pub_footer">
           <tiles:insertAttribute name="footer" />
       </footer>
   </body>

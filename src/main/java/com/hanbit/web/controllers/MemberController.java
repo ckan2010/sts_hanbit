@@ -1,5 +1,7 @@
 package com.hanbit.web.controllers;
 
+import javax.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.hanbit.web.domains.Command;
@@ -21,7 +24,7 @@ import com.hanbit.web.service.impl.MemberServiceImpl;
 public class MemberController {
 	private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
 	@Autowired MemberServiceImpl service;
-	
+	@Autowired MemberDTO member;
 	@Autowired Command command;
 	@RequestMapping("/search/{option}/{keyword}")
 	public MemberDTO find(@PathVariable("option") String option,
@@ -32,38 +35,35 @@ public class MemberController {
 		command.setOption(option);
 		return service.findOne(command);
 	}
-	@RequestMapping(value="/count/{condition}",method=RequestMethod.GET,consumes="application/json")
-	public String count(@PathVariable String condition,
+	@RequestMapping(value="/count/{option}",consumes="application/json")
+	public Model count(@PathVariable("option") String option,
 			Model model){
-		logger.info("TO COUNT CONDITION IS {}",condition);
-		int count = service.count();
-		model.addAttribute("count", count);
-		return "admin:member/detail.tiles";
+		logger.info("TO COUNT OPTION IS {}",option);
+		model.addAttribute("count", service.count());
+		return model;
 	}
 	@RequestMapping(value="/login",method=RequestMethod.POST)
-	public String login(@RequestParam("id") String id,
+	public @ResponseBody MemberDTO login(@RequestParam("id") String id,
 			@RequestParam("pw") String pw,
-			@RequestParam("context")String context,
-			Model model) {
-		logger.info("GO TO {}","execute login");
+			HttpSession session) {
 		logger.info("TO LOGIN ID IS {}",id);
 		logger.info("TO LOGIN PW IS {}",pw);
-		logger.info("CONTXT IS {}",context);
-		MemberDTO member = new MemberDTO();
 		member.setId(id);
 		member.setPw(pw);
 		member = service.login(member);
 		if (member.getId().equals("NONE")) {
 			logger.info("Controller LOGIN {}","FAIL");
-			return "public:member/login.tiles";
-			
+			return member;
 		}else{
-			model.addAttribute("user", member);
+			logger.info("Controller LOGIN {}","SUCCESS");
+			String context = (String) session.getAttribute("context");
+			/*model.addAttribute("user", member);
 			model.addAttribute("context", context);
 			model.addAttribute("js", context+"/resources/js");
 			model.addAttribute("css", context+"/resources/css");
 			model.addAttribute("img", context+"/resources/img");
-			return "user:user/content.tiles";
+			*/
+			return member;
 		}
 		
 	}

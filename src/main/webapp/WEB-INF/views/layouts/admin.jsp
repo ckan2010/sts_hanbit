@@ -20,19 +20,19 @@
   </head>
   <body>
       <header>
-        <div>
+        <div id="admin_header">
           <tiles:insertAttribute name="header" />
         </div>
       </header>
-        <nav>
+        <nav id="admin_nav">
           <tiles:insertAttribute name="menu" />
         </nav>
         <section>
-        <article>	
+        <article id="admin_article">	
           <tiles:insertAttribute name="body" />
           </article>
         </section>
-      <footer>
+      <footer id="admin_footer">
           <tiles:insertAttribute name="footer" />
       </footer>
   </body>
