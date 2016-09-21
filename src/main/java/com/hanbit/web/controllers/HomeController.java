@@ -25,7 +25,9 @@ public class HomeController {
 		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
 		String formattedDate = dateFormat.format(date);
 		logger.info("SERVER START TIME IS {}", formattedDate);
-		return "public:public/content.tiles";
+		return "user/header.jsp";
+		// return "public:public/content.tiles";
+		// return "public:public/school_info.tiles";
 	}
 	@RequestMapping("public/school_info")
 	public String school_info(){

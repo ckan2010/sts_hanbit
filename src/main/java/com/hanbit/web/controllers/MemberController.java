@@ -50,21 +50,21 @@ public class MemberController {
 		logger.info("TO LOGIN PW IS {}",pw);
 		member.setId(id);
 		member.setPw(pw);
-		member = service.login(member);
-		if (member.getId().equals("NONE")) {
+		MemberDTO user = service.login(member);
+		if (user.getId().equals("NONE")) {
 			logger.info("Controller LOGIN {}","FAIL");
-			return member;
+			return user;
 		}else{
 			logger.info("Controller LOGIN {}","SUCCESS");
-			String context = (String) session.getAttribute("context");
-			/*model.addAttribute("user", member);
-			model.addAttribute("context", context);
-			model.addAttribute("js", context+"/resources/js");
-			model.addAttribute("css", context+"/resources/css");
-			model.addAttribute("img", context+"/resources/img");
-			*/
-			return member;
+			session.setAttribute("user",user);
+			return user;
 		}
+		
+	}
+	@RequestMapping("/logined/header")
+	public String loginedHeader() {
+		logger.info("THIS PATH IS {}","LOGINED_HEADER");
+		return "user/header.jsp";
 		
 	}
 	@RequestMapping("/main")

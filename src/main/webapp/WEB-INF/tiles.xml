@@ -32,4 +32,18 @@
    <definition name="admin:*/*.tiles" extends="admin">
     <put-attribute name="body" value="/WEB-INF/views/{1}/{2}.jsp" />
   </definition>
+  <!-- 노타일즈 -->
+<definition name="noTiles" template="/WEB-INF/view/noTemplate.jsp">
+	<put-attribute name="noTemplate" value=""/>
+</definition>
+<definition name="*.jsp" extends="noTiles">
+	<put-attribute name="noTemplate" value="WEB-INF/views/{1}.jsp"/>
+</definition>
+<definition name="*/*.jsp" extends="noTiles">
+	<put-attribute name="noTemplate" value="WEB-INF/views/{1}/{2}.jsp"/>
+</definition>
+<definition name="*/*/*.jsp" extends="noTiles">
+	<put-attribute name="noTemplate" value="WEB-INF/views/{1}/{2}/{3}.jsp"/>
+</definition>
 </tiles-definitions>
+
