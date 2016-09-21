@@ -299,6 +299,15 @@ var member = (function(){
 								+'</div></div></div></section>';
 							$('#pub_header').empty().load(app.context()+'/member/logined/header');
 							$('#pub_article').html(view);
+							/*
+							$('#logout').on('click',function(){
+								$.ajax(function(){
+									url : '',
+									dataType : 'POST',
+									data : {},
+								});
+								
+							});*/
 						}
 					},
 					error : function(xhr,status,msg){

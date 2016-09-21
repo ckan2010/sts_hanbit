@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
@@ -104,9 +105,11 @@ public class MemberController {
 		return "public:member/login.tiles";
 	}
 	@RequestMapping("/logout")
-	public String logout() {
-		logger.info("GO TO {}","logout");
-		return "admin:member/logout.tiles";
+	public String moveLogout(SessionStatus status) {
+		logger.info("GO TO {}","LOGOUT");
+		status.setComplete();
+		logger.info("SESSION IS {}","CLEAR");
+		return "public:member/logout.tiles";
 	}
 	@RequestMapping("/list")
 	public String list() {
