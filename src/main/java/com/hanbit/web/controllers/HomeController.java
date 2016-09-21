@@ -27,7 +27,7 @@ public class HomeController {
 		logger.info("SERVER START TIME IS {}", formattedDate);
 		return "user/header.jsp";
 		// return "public:public/content.tiles";
-		// return "public:public/school_info.tiles";
+		//return "public:public/school_info.tiles";
 	}
 	@RequestMapping("public/school_info")
 	public String school_info(){
