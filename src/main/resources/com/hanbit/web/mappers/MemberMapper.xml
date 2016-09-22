@@ -21,4 +21,11 @@
 	<select id="count" resultType="int">
 		select count(*) count from member 
 	</select>
+	<select id="existId" parameterType="com.hanbit.web.domains.MemberDTO" resultType="int">
+		select count(*) from member where mem_id = #{id}
+	</select>
+	<insert id="insert" parameterType="com.hanbit.web.domains.MemberDTO">
+		insert into member(id,pw,name,ssn,email,phone)
+		values(#{id},#{pw},#{name},#{ssn},#{email},#{phone})
+	</insert>
 </mapper>

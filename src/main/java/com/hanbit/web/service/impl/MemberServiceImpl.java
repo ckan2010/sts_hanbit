@@ -27,13 +27,7 @@ public class MemberServiceImpl implements MemberService{
 	}
 	@Override
 	public String open(MemberDTO stu) {
-		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
-		int cnt = findId(stu.getId());
-		if (cnt == 0) {
-			return "";		
-		} else {
-			return "중복 ID 입니다.";
-		}
+		return (sqlSession.getMapper(MemberMapper.class).insert(member)==0)?"fail":"sucess";
 	}
 	@Override
 	public MemberDTO show() {
@@ -113,5 +107,11 @@ public class MemberServiceImpl implements MemberService{
 		mem.setId("NONE");
 		logger.info("MemberService LOGIN IS {}","FAIL");
 		return mem;
+	}
+	@Override
+	public int existId(String id) {
+		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
+		logger.info("MemberService existId = {}",id);
+		return mapper.existId(id);
 	}
 }

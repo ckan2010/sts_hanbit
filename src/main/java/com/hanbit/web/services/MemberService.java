@@ -24,4 +24,5 @@ public interface MemberService extends CommonService{
 	public int findId(String id);
 	public int findPw(MemberDTO mem);
 	public void logout(MemberDTO mem);
+	public int existId(String id);
 }

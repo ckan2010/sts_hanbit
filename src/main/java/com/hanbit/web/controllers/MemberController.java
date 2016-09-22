@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.support.SessionStatus;
 
 import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
+import com.hanbit.web.domains.Retval;
 import com.hanbit.web.service.impl.MemberServiceImpl;
 
 @Controller // has a 관계
@@ -27,6 +29,7 @@ public class MemberController {
 	@Autowired MemberServiceImpl service;
 	@Autowired MemberDTO member;
 	@Autowired Command command;
+	@Autowired Retval retval;
 	@RequestMapping("/search/{option}/{keyword}")
 	public MemberDTO find(@PathVariable("option") String option,
 			@PathVariable("keyword")String keyword){
@@ -63,20 +66,42 @@ public class MemberController {
 		
 	}
 	@RequestMapping("/logined/header")
-	public String loginedHeader() {
-		logger.info("THIS PATH IS {}","LOGINED_HEADER");
+	public String loginedHeader(){
+		logger.info("TO COUNT CONDITION IS : {}","LOGINED_HEADER");
 		return "user/header.jsp";
-		
 	}
 	@RequestMapping("/main")
 	public String moveMain() {
 		logger.info("GO TO {}","main");
 		return "admin:member/content.tiles";
 	}
-	@RequestMapping("/regist")
-	public String regist() {
-		logger.info("GO TO {}","regist");
-		return "public:member/regist.tiles";
+	@RequestMapping(value="/signup",method=RequestMethod.POST,consumes="application/json")
+	public @ResponseBody  Retval singup(@RequestBody MemberDTO param) {		
+		logger.info("SIGN UP {}","EXEUTE");
+		logger.info("SIGN UP ID = {}",param.getId());
+		logger.info("SIGN UP PW = {}",param.getPw());
+		logger.info("SIGN UP SSN = {}",param.getSsn());
+		logger.info("SIGN UP EMAIL = {}",param.getEmail());
+		logger.info("SIGN UP PHONE = {}",param.getPhone());
+		//retval.setMessage(service.open(param));
+		retval.setMessage("success");
+		logger.info("Message = {}",retval.getMessage());
+		return retval;
+	}
+	@RequestMapping("/check_dup/{id}")
+	public @ResponseBody  Retval check_dup(@PathVariable String id) {
+		logger.info("CHECK DUP {}","EXEUTE");
+		if (service.existId(id) == 1) {
+			retval.setFlag("TRUE");
+			retval.setMessage("존재하는 ID입니다.");
+		} else {
+			retval.setFlag("FALSE");
+			retval.setMessage("사용가능 ID입니다.");
+			retval.setTemp(id);
+		}
+		logger.info("RETURN VALUE IS {}",retval.getFlag());
+		logger.info("RETURN VALUE IS {}",retval.getMessage());
+		return retval;
 	}
 	@RequestMapping("/a_detail")
 	public String moveDetail(@RequestParam("key")String key) {
@@ -105,11 +130,11 @@ public class MemberController {
 		return "public:member/login.tiles";
 	}
 	@RequestMapping("/logout")
-	public String moveLogout(SessionStatus status) {
+	public String logout(SessionStatus status) {
 		logger.info("GO TO {}","LOGOUT");
 		status.setComplete();
 		logger.info("SESSION IS {}","CLEAR");
-		return "public:member/logout.tiles";
+		return "redirect:/member/regist";
 	}
 	@RequestMapping("/list")
 	public String list() {

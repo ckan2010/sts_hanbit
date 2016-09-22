@@ -20,5 +20,5 @@ public interface MemberMapper {
 	public int findByGender(String gender);
 	public int findId(String id);
 	public int findPw(MemberDTO mem);
-	public boolean existId(String id);
+	public int existId(String id);
 }
