@@ -3,9 +3,10 @@
  */
 package com.hanbit.web.services;
 
+import java.util.List;
+
 import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
-import com.hanbit.web.util.CommonService;
 
 /**
  * @date   :2016. 6. 17.
@@ -13,10 +14,10 @@ import com.hanbit.web.util.CommonService;
  * @file   :StudentService.java
  * @story  :
  */
-public interface MemberService extends CommonService{
+public interface MemberService{
 	public String open(MemberDTO stu);
 	public MemberDTO show();
-	public void update(MemberDTO stu);
+	public String update(MemberDTO stu);
 	public String delete(String id);
 	public MemberDTO findOne(Command command);
 	public int genderCount(String gender);
@@ -25,4 +26,5 @@ public interface MemberService extends CommonService{
 	public int findPw(MemberDTO mem);
 	public void logout(MemberDTO mem);
 	public int existId(String id);
+	public List<MemberDTO> list(Command command);
 }

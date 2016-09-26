@@ -197,6 +197,29 @@ var SIGN_UP_FORM = '<section id="member_regist"><form id="member_regist_form">'
 	+'<label ><input type="checkbox" name="subject"  value="html"> HTML</label></div></div> </div>'
 	+'<input id="bt_join" type="submit" value="회원가입" />'
 	+'<input id="bt_cancel" type="reset" value="취소" /></form></section>';
+var DETAIL_FORM =
+	 '<div class="box"> <h2>내정보보기</h2> <table id="member_detail"><tr>'
+	+'<td rowspan="8" style="width:30%"><img id="img" src="" alt="W3Schools.com" width="104" height="142">'
+	+'</td><td class="font_bold bg_color_yellow" style="width:20%">ID</td>'
+	+'<td id="id" style="width:40%"></td></tr><tr>'
+	+'<td class="font_bold bg_color_yellow">비밀번호</td><td id="u_pw"></td></tr><tr>'
+	+'<td class="font_bold bg_color_yellow">이 름</td><td id="name" ></td></tr><tr>'
+	+'<td class="font_bold bg_color_yellow">성 별</td><td id="gender" ></td>'
+	+'</tr><tr><td class="font_bold bg_color_yellow">이메일</td>'
+	+'<td id="u_email"></td></tr><tr><td class="font_bold bg_color_yellow">전공과목</td>'
+	+'<td id="u_major"></td></tr><tr><td class="font_bold bg_color_yellow">수강과목</td>'
+	+'<td id="u_subject" colspan="2"></td></tr><tr><td class="font_bold bg_color_yellow">전화번호</td>'
+	+'<td id="u_phone"></td></tr><tr>'
+	+'<td class="font_bold bg_color_yellow">생년월일</td><td id="birth" colspan="2"></td>'
+	+'</tr><tr><td class="font_bold bg_color_yellow">등록일</td>'
+	+'<td id="regdate" colspan="2"></td></tr></table>'
+	+'<div id="bt_box"><input id="go_update" type="submit" value="정보수정하러가기" /><input id="unregist" type="submit" value="회원탈퇴" /></div></div>'
+	;
+var UNREGIST_FORM =
+	+'<div class="box"><h3>탈퇴하시려면 비밀번호를 다시 입력해 주세요</h3>'
+	+'<form id="member_delete_form" class="navbar-form navbar-center" role="search">'
+	+'<div class="form-group"><input id="ch_pw" type="password" class="form-control" placeholder="PASSWORD">'
+	+'</div><button id="unregist_bt" type="submit" class="btn btn-default">탈 퇴</button></form></div>';
 var member = (function(){
 	var _age,_gender,_name,_ssn;
 	var setAge = function(age){this._age=age;}
@@ -294,7 +317,6 @@ var member = (function(){
 						}else{
 							$('#pub_header').empty().load(app.context()+'/member/logined/header');
 							$('#pub_article').html(STUDENT_MAIN);
-							
 						}
 					},
 					error : function(xhr,status,msg){
@@ -305,7 +327,7 @@ var member = (function(){
 		},
 		pub_sign_up_form : function(){
 			$('#pub_article').empty().append(SIGN_UP_FORM);
-			member.init();			
+			app.init();			
 			$('#check_dup').click(function(){
 				if(util.pwChecker($('#id').val())==='yes'){
 					$.ajax({
@@ -313,10 +335,10 @@ var member = (function(){
 						success : function(data){
 							if(data.flag==="TRUE"){
 								$('#id_box').html('<input type="text" id="id" placeholder="'+data.message+'"><input type="button" id="re_check" name="check_dup" value="다시 조회"/>');
-								member.init();
+								app.init();
 							}else{
 								$('#id_box').html('<input type="text" id="id" value="'+data.temp+'"><input type="button" id="use_input_id" name="check_dup" value="그대로 사용"/>');
-								member.init();								
+								app.init();								
 								$('#bt_join').click(function(e){
 									e.preventDefault();
 									var join_info = {
@@ -377,6 +399,83 @@ var member = (function(){
 					$('#check_pw').html('<font size="2" color="red">비밀번호틀림</font>');
 				}
 			});
+		},
+		detail : function(){
+			$('#pub_header').empty().load(app.context()+'/member/logined/header');
+			$('#pub_article').html(DETAIL_FORM);
+				$.getJSON(app.context()+'/member/detail',function(data){
+						    $('#member_detail #img').attr('src',app.img()+'/default/'+data.profileImg);
+							$('#member_detail #id').text(data.id);
+							$('#member_detail #name').text(data.name);
+							$('#member_detail #gender').text(data.gender);
+							$('#member_detail #u_email').text(data.email);
+							$('#member_detail #u_major').text('컴퓨터공학과');
+							$('#member_detail #u_subject').text('JAVA');
+							$('#member_detail #u_phone').text(data.phone);
+							$('#member_detail #birth').text(data.birth);
+							$('#member_detail #regdate').text(data.regDate);							
+							$('#go_update').click(function(){	
+								$('#member_detail #u_pw').html('<input type="text" id="pw" value="'+data.pw+'"/>');
+								$('#member_detail #u_email').html('<input type="text" id="email" value="'+data.email+'"/>');
+								$('#member_detail #u_major').html('<input type="text" id="major" value="컴퓨터공학과"/>');
+								$('#member_detail #u_subject').html('<input type="text" id="subject" value="JAVA"/>');
+								$('#member_detail #u_phone').html('<input type="text" id="phone" value="'+data.phone+'"/>');
+								$('#bt_box').html('<input id="confirm" type="submit" value="확인" /><input id="cancel" type="submit" value="취소" />');
+								$('#confirm').click(function(){		
+									var join_info = {
+										'id' : $('#member_detail #id').html(),
+										'pw' : $('#member_detail #pw').val(),
+										'email' : $('#member_detail #email').val(),
+										'phone' : $('#member_detail #phone').val()
+									};
+									$.ajax({
+										url : app.context()+'/member/update',
+										type : 'post',
+										contentType : 'application/json',
+										data : JSON.stringify(join_info),
+										dataType : 'json',										
+										success : function(data){
+											if (data.flag==='TRUE') {
+												member.detail();
+											} else {
+												alert('서버는 다녀왔는데 실패함 !!');
+											}
+										},
+										error : function(x,s,m){
+											alert('정보 수정시 발생한 에러 : '+m)
+										}
+									});
+								});
+							});
+							$('#unregist').click(function(){
+								$('#pub_article').html(UNREGIST_FORM);
+								$('#unregist_bt').click(function(){
+									$.ajax({
+										url : app.context()+'/member/delete',
+										type : 'post',
+										data : {'pw':$('#ch_pw').val()},
+										dataType : 'json',
+										success : function(data){
+											alert('확인 패스워드 : '+$('#ch_pw').val());
+											if(data.flag==='TRUE'){
+												alert('pw 일치');
+												//$('#pub_header').empty().load(app.context()+'/member/logined/header');
+												//location.href = app.context()+'/';
+												member.pub_login_form();
+											}else{
+												alert('pw 불일치');
+												//$('#pub_article').html(UNREGIST_FORM);
+												member.pub_login_form();
+											}
+										},
+										error : function(x,s,m){
+											alert('회원탈퇴 시 발생한 에러: '+m);
+										}
+										
+									});
+								});
+							});
+				});
 		}
 	};	
 })();
@@ -393,15 +492,15 @@ var STUDENT_MAIN = '<section id="user_content_service" class="box section-padded
 	+'<h4 class="light muted">Achieve the best results with our wide variety of training options!</h4></div>'
 	+'<div class="row services">'
 	+'<div class="col-md-4"><div id="kaup" class="service">'
-	+'<div class="icon-holder"><img src="'+app.img()+'/icons/heart-blue.png" alt="" class="icon"></div>'
+	+'<div class="icon-holder"><img src="'+app.img()+'/icons/kaup.png" alt="" class="icon"></div>'
 	+'<h4 class="heading">KAUP INDEX</h4>'
 	+'<p class="description">A elementum ligula lacus ac quam ultrices a scelerisque praesent vel suspendisse scelerisque a aenean hac montes.</p></div></div>'
 	+'<div class="col-md-4"><div id="rock_sissor_paper" class="service">'
-	+'<div class="icon-holder"><img src="'+app.img()+'/icons/guru-blue.png" alt="" class="icon"></div>'
+	+'<div class="icon-holder"><img src="'+app.img()+'/icons/rock_sis.jpg" alt="" class="icon"></div>'
 	+'<h4 class="heading">ROCK SISSOR PAPER</h4>'
 	+'<p class="description">A elementum ligula lacus ac quam ultrices a scelerisque praesent vel suspendisse scelerisque a aenean hac montes.</p></div></div>'
 	+'<div class="col-md-4"><div id="lotto" class="service">'
-	+'<div class="icon-holder"><img src="'+app.img()+'/icons/weight-blue.png" alt="" class="icon"></div>'
+	+'<div class="icon-holder"><img src="'+app.img()+'/icons/lotto.jpg" alt="" class="icon"></div>'
 	+'<h4 class="heading">LOTTO DRAWING</h4>'
 	+'<p class="description">A elementum ligula lacus ac quam ultrices a scelerisque praesent vel suspendisse scelerisque a aenean hac montes.</p></div></div></div></div>'
 	+'<div class="cut cut-bottom"></div></section>'
@@ -409,25 +508,25 @@ var STUDENT_MAIN = '<section id="user_content_service" class="box section-padded
 	+'<div class="row title text-center"><h2 class="margin-top">MAJOR SUBJECT</h2>'
 	+'<h4 class="light muted">TOP 3</h4></div>'
 	+'<div class="row"><div class="col-md-4"><div id="major_subject_1"  class="team text-center">'
-	+'<div class="cover" style="background:url('+app.img()+'/team/team-cover1.jpg")"; background-size:cover;">'
+	+'<div class="cover" style="background:url('+app.img()+'/default/sana1.jpg")"; background-size:cover;">'
 	+'<div class="overlay text-center"><h3 class="white">Java</h3><h5 class="light light-white">Server Program Language</h5></div></div>'
-	+'<img src="'+app.img()+'/team/team3.jpg" alt="Team Image" class="avatar">'
+	+'<img src="'+app.img()+'/team/java.jpg" alt="Team Image" class="avatar">'
 	+'<div class="title"><h4>Java</h4><h5 class="muted regular">Server Program Language</h5></div>'
 	+'<input type="hidden" name="major_subject_1" value="java">'
 	+'<input id="aaaa" type="button" data-toggle="modal" data-target="#modal1" class="btn btn-blue-fill" value="과목 정보 보기"/></div></div>'
 	+'<div class="col-md-4"><div id="major_subject_2"  class="team text-center">'
-	+'<div class="cover" style="background:url('+app.img()+'/team/team-cover2.jpg"); background-size:cover;">'
+	+'<div class="cover" style="background:url('+app.img()+'/default/park1.jpg"); background-size:cover;">'
 	+'<div class="overlay text-center"><h3 class="white">Javascript</h3><h5 class="light light-white">UI Program Language</h5></div></div>'
-	+'<img src="'+app.img()+'/team/team1.jpg" alt="Team Image" class="avatar">'
+	+'<img src="'+app.img()+'/team/javascript.jpg" alt="Team Image" class="avatar">'
 	+'<div class="title"><h4>Javascript</h4>'
 	+'<h5 class="muted regular">UI Program Language</h5></div>'
 	+'<input type="hidden" name="major_subject_2">'
 	+'<input type="button" data-toggle="modal" data-target="#modal1" class="btn btn-blue-fill" value="과목 정보 보기"/></div></div>'
 	+'<div class="col-md-4"><div id="major_subject_3" class="team text-center">'
-	+'<div class="cover" style="background:url('+app.img()+'/team/team-cover3.jpg"); background-size:cover;">'
+	+'<div class="cover" style="background:url('+app.img()+'/default/han1.jpg"); background-size:cover;">'
 	+'<div class="overlay text-center"><h3 class="white">SQL</h3>'
 	+'<h5 class="light light-white">Database Management Language</h5></div></div>'
-	+'<img src="'+app.img()+'/team/team2.jpg" alt="Team Image" class="avatar"><div class="title">'
+	+'<img src="'+app.img()+'/team/sql.jpg" alt="Team Image" class="avatar"><div class="title">'
 	+'<h4>SQL</h4>'
 	+'<h5 class="muted regular">Database Management Language</h5></div>'
 	+'<input type="hidden" name="major_subject_3">'
@@ -437,6 +536,7 @@ var user = (function(){
 	var init = function(){onCreate();};
 	var setContentView = function(){
 		$('#member_content_img_home').attr('src',app.img()+'/home.png');
+		$('#user_header #logout').addClass('cursor');
 	};
 	var onCreate = function(){
 		setContentView();
@@ -459,7 +559,7 @@ var user = (function(){
 		$('#user_header #a_update').click(function(){controller.move('member','update');});
 		$('#user_header #a_delete').click(function(){controller.move('member','delete');});
 		$('.navbar-header').css('height','50px');
-		$('#user_header #logout').addClass('cursor').click(function() {controller.home();});
+		$('#user_header #logout').click(function() {controller.home();});
 		$("#user_header #account li:eq(0) a").click(function(){controller.move('account','detail');});
 		$("#user_header #account li:eq(1) a").click(function(){controller.move('account','open');});
 		$("#user_header #account li:eq(2) a").click(function(){controller.move('account','transaction');});
@@ -514,7 +614,10 @@ var admin = (function() {
     	getPass : getPass,
     	setPass : setPass,
     	init : init,
-    	check : function() {
+    	check : function(){
+    		controller.move('admin','main');
+    	},
+    	check2 : function() {
     		setPass(1);
 			var isAdmin = confirm('관리자입니까?');
 			if (!isAdmin) {

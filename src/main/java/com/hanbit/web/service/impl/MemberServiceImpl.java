@@ -1,7 +1,6 @@
 package com.hanbit.web.service.impl;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
@@ -35,23 +34,31 @@ public class MemberServiceImpl implements MemberService{
 		return member;
 	}
 	@Override
-	public void update(MemberDTO stu) {
+	public String update(MemberDTO stu) {
 		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
+		int cnt = mapper.update(stu);
+		String msg="";
+		if (cnt==0) {
+			msg = "FALSE";
+		} else {
+			msg = "TRUE";
+		}
+		return msg;
 	}
 	@Override
 	public String delete(String id) {
 		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
 		String msg = "";
+		if(mapper.delete(id)!=0){
+			msg = "TRUE";
+		}else{
+			msg = "FALSE";
+		}
 		return msg;
 	}
 	public int count() {
 		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
-		return 0;
-	}
-	@Override
-	public Map<?, ?> map() {
-		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
-		return null;
+		return mapper.count();
 	}
 	@Override
 	public void logout(MemberDTO mem) {
@@ -61,16 +68,6 @@ public class MemberServiceImpl implements MemberService{
 		   ) {
 			member = null;
 		} 
-	}
-	@Override
-	public List<?> list() {
-		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
-		return null;
-	}
-	@Override
-	public List<?> findBy(String keyword) {
-		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
-		return null;
 	}
 	@Override
 	public MemberDTO findOne(Command command) {
@@ -113,5 +110,10 @@ public class MemberServiceImpl implements MemberService{
 		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
 		logger.info("MemberService existId = {}",id);
 		return mapper.existId(id);
+	}
+	@Override
+	public List<MemberDTO> list(Command command) {
+		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
+		return mapper.list(command);
 	}
 }

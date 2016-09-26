@@ -1,3 +1,14 @@
+select mem_id as id,
+               pw as pw,
+               name as name,
+               gender as gender,
+               reg_date as regDate,
+               ssn as ssn,
+               substrb(ssn,1,6) birth,
+               email as email,
+               profile_img as profileImg,
+               phone as phone
+	   from    member where mem_id = 'haesu';
 /*
 ======== META_GROUP =========
 @AUTHOR : ckan2010@gmail.com
@@ -248,7 +259,7 @@ BEGIN
 	VALUES(sp_mem_id,sp_pw,sp_name,sp_gender,sp_reg_date,sp_ssn,sp_email,sp_profile_img,sp_role,sp_phone);
 END insert_prof;
 -- EXC_INSERT_PROFESSOR
-EXEC insert_prof('prof_james','1','제임스 고슬링','MALE','2016-08-01','620905-1','james@test.com','prof_james.jpg','PROF','010-1234-5678');
+EXEC insert_prof('bae1','1','배수지','FEMALE','2016-08-01','620905-1','james@test.com','prof_james.jpg','PROF','010-1234-5678');
 -- SP_COUNT_PROFESSOR
 CREATE OR REPLACE PROCEDURE count_prof(sp_count OUT NUMBER) AS
 BEGIN SELECT COUNT(*) INTO sp_count FROM Member m WHERE role = 'PROF' ;END count_prof;
@@ -370,7 +381,19 @@ BEGIN
 	VALUES(sp_mem_id,sp_pw,sp_name,sp_gender,sp_reg_date,sp_ssn,sp_email,sp_profile_img,sp_role,sp_phone,sp_major_seq);
 END insert_student;
 -- EXC_INSERT_STUDENT
-EXEC insert_student('han','1','한효주','FEMALE','2016-07-01','870222-2','han@test.com','han.jpg','STUDENT','010-1234-5678',1000);
+EXEC insert_student('bae1','1','배수지','FEMALE','2016-07-01','941010-2','bae1@test.com','bae1.jpg','STUDENT','010-1111-1111',1000);
+EXEC insert_student('bewhy','1','비와이','MALE','2016-07-02','930615-1','bewhy@test.com','bewhy.jpg','STUDENT','010-2222-2222',1000);
+EXEC insert_student('choi','1','최우식','FEMALE','2016-07-03','900326-1','choi@test.com','choi.jpg','STUDENT','010-3333-3333',1000);
+EXEC insert_student('gong','1','공유','FEMALE','2016-07-04','790710-1','gong@test.com','gong.jpg','STUDENT','010-4444-4444',1000);
+EXEC insert_student('kim1','1','김래원','FEMALE','2016-07-05','810319-1','kim1@test.com','kim1.jpg','STUDENT','010-5555-5555',1000);
+EXEC insert_student('ma11','1','마동석','FEMALE','2016-07-06','710301-1','ma11@test.com','ma11.jpg','STUDENT','010-6666-6666',1000);
+EXEC insert_student('sana','1','사나','MALE','2016-07-07','961226-2','sana@test.com','sana.jpg','STUDENT','010-7777-7777',1000);
+EXEC insert_student('song','1','송중기','FEMALE','2016-07-08','850919-1','song@test.com','song.jpg','STUDENT','010-8888-8888',1000);
+EXEC insert_student('tzuyu','1','쯔위','FEMALE','2016-07-09','990614-2','tzuyu@test.com','tzuyu.jpg','STUDENT','010-9999-9999',1000);
+EXEC insert_student('song1','1','송지효','FEMALE','2016-07-10','810815-2','song1@test.com','song1.jpg','STUDENT','010-1010-1010',1000);
+EXEC insert_student('bae1','1','배수지','FEMALE','2016-07-01','941010-2','bae1@test.com','bae1.jpg','STUDENT','010-1111-1111',1000);
+EXEC insert_student('bae1','1','배수지','FEMALE','2016-07-01','941010-2','bae1@test.com','bae1.jpg','STUDENT','010-1111-1111',1000);
+EXEC insert_student('bae1','1','배수지','FEMALE','2016-07-01','941010-2','bae1@test.com','bae1.jpg','STUDENT','010-1111-1111',1000);
 -- SP_COUNT_STUDENT
 CREATE OR REPLACE PROCEDURE count_student(sp_student_cnt OUT NUMBER) AS
 BEGIN SELECT COUNT(*) INTO sp_student_cnt FROM member u WHERE u.role = 'STUDENT'; commit; END count_student;
@@ -788,3 +811,54 @@ ALTER TABLE Member MODIFY phone VARCHAR2(13) UNIQUE;
 ALTER TABLE Board MODIFY category VARCHAR2(10) UNIQUE;
 
 ALTER TABLE Subject MODIFY subj_name VARCHAR2(20) UNIQUE;
+
+select *
+from   member
+;
+select m.mem_id id,
+       m.name name,
+       m.gender gender,
+       m.reg_date regDate,
+       m.ssn ssn,
+       m.email email,
+       m.profile_img profileImg,
+       m.role role,
+       m.phone phone,
+       m.major_seq majorSeq       
+from   member m
+order by reg_date desc
+;
+select rownum seq
+      ,t.*
+select m.mem_id id,
+       			   m.name name,
+                   m.gender gender,
+       			   m.reg_date regDate,
+       			   m.ssn ssn,
+                   m.email email,
+                   m.profile_img profileImg,
+                   m.role role,
+                   m.phone phone,
+                   m.major_seq majorSeq       
+            from   member m
+            order by reg_date desc
+select t2.*
+from (select rownum seq
+            ,t.* 
+      from (select m.mem_id id,
+       			   m.name name,
+                   m.gender gender,
+       			   m.reg_date regDate,
+       			   m.ssn ssn,
+                   m.email email,
+                   m.profile_img profileImg,
+                   m.role role,
+                   m.phone phone,
+                   m.major_seq majorSeq       
+            from   member m
+            order by reg_date desc
+           ) t
+     ) t2
+where t2.seq between 1 and 10
+order by t2.seq asc
+;

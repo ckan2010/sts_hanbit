@@ -12,7 +12,7 @@ public interface MemberMapper {
 	public int insert(MemberDTO stu);
 	public int update(MemberDTO stu);
 	public int delete(String id);
-	public List<MemberDTO> list();
+	public List<MemberDTO> list(Command command);
 	public MemberDTO findOne(Command command);
 	public List<?> findByName(String name);
 	public int count();

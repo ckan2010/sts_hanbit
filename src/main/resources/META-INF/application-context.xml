@@ -101,5 +101,16 @@
         </list>
     </property>
 </bean>
+<mvc:interceptors>
+	<mvc:interceptor>
+		<mvc:mapping path="/**/*/"/>
+		<mvc:exclude-mapping path="/admin/*"/>
+		<bean class="com.hanbit.web.interceptors.LogInterceptor"/>
+	</mvc:interceptor>
+	<mvc:interceptor>
+		<mvc:mapping path="/admin/**/*/"/>
+		<bean class="com.hanbit.web.interceptors.AdminInterceptor"/>
+	</mvc:interceptor>
+</mvc:interceptors>
 
 </beans>
