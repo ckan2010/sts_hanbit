@@ -30,3 +30,8 @@
  		<li><a id="c_count" href="#">통장수</a></li>
     </ul>
 </ul>
+<script type="text/javascript">
+   $(function(){
+	   $('#list').click(function(){admin.member_list();});
+   });
+</script>

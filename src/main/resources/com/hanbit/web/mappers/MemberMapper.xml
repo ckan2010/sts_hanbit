@@ -3,29 +3,30 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hanbit.web.mappers.MemberMapper">
-	<select id="list" resultType="com.hanbit.web.domains.MemberDTO" parameterType="com.hanbit.web.domains.Command">
-		select t2.*
+   <select id="list" resultType="com.hanbit.web.domains.MemberDTO" parameterType="com.hanbit.web.domains.Command">
+      select t2.*
 from (select rownum seq
             ,t.* 
       from (select m.mem_id id,
-       			   m.name name,
+                   m.name name,
                    m.gender gender,
-       			   m.reg_date regDate,
-       			   m.ssn ssn,
+                   m.reg_date regDate,
+                   m.ssn ssn,
                    m.email email,
                    m.profile_img profileImg,
                    m.role role,
                    m.phone phone,
-                   m.major_seq majorSeq       
+                   m.major_seq majorSeq,
+                   substrb(m.ssn,1,6) birth
             from   member m
             order by reg_date desc
            ) t
      ) t2
 where t2.seq between #{start} and #{end}
 order by t2.seq asc
-	</select>
-	<select id="findOne" parameterType="com.hanbit.web.domains.Command" resultType="com.hanbit.web.domains.MemberDTO">
-		select mem_id as id,
+   </select>
+   <select id="findOne" parameterType="com.hanbit.web.domains.Command" resultType="com.hanbit.web.domains.MemberDTO">
+      select mem_id as id,
                pw as pw,
                name as name,
                gender as gender,
@@ -35,22 +36,42 @@ order by t2.seq asc
                email as email,
                profile_img as profileImg,
                phone as phone
-	   from    member where ${option} = #{keyword}
-	</select>
-	<select id="count" resultType="int">
-		select count(*) count from member 
-	</select>
-	<select id="existId" parameterType="com.hanbit.web.domains.MemberDTO" resultType="int">
-		select count(*) from member where mem_id = #{id}
-	</select>
-	<insert id="insert" parameterType="com.hanbit.web.domains.MemberDTO">
-		insert into member(id,pw,name,ssn,email,phone)
-		values(#{id},#{pw},#{name},#{ssn},#{email},#{phone})
-	</insert>
-	<update id="update" parameterType="com.hanbit.web.domains.MemberDTO">
-		update member set pw = #{pw}, email = #{email}, phone = #{phone} where mem_id = #{id} 
-	</update>
-	<delete id="delete" parameterType="com.hanbit.web.domains.MemberDTO">
-		delete member where mem_id = #{id}
-	</delete>
-</mapper>
+      from    member where ${keyField} = #{keyword}
+   </select>
+   <select id="count" resultType="com.hanbit.web.domains.Retval" >
+   select count(*) as count from member where role='STUDENT'
+   </select>
+   <select id="count2" statementType="CALLABLE"  parameterType="com.hanbit.web.domains.Retval" >
+      { call HANBIT.COUNT_STUDENT(
+         #{count, mode=OUT,jdbcType=INTEGER}
+      )
+      }
+   </select>
+   <select id="existId" parameterType="com.hanbit.web.domains.MemberDTO" resultType="int">
+      select count(*) from member where mem_id = #{id}
+   </select>
+   <select id="find" resultType="com.hanbit.web.domains.MemberDTO" parameterType="com.hanbit.web.domains.Command">
+      select mem_id as id,
+               pw as pw,
+               name as name,
+               gender as gender,
+               reg_date as regDate,
+               ssn as ssn,
+               substrb(ssn,1,6) birth,
+               email as email,
+               profile_img as profileImg,
+               phone as phone,
+               major_seq as majorSeq
+      from    member where ${keyField} = #{keyword}
+   </select>
+   <insert id="insert" parameterType="com.hanbit.web.domains.MemberDTO">
+      insert into member(id,pw,name,ssn,email,phone)
+      values(#{id},#{pw},#{name},#{ssn},#{email},#{phone})
+   </insert>
+   <update id="update" parameterType="com.hanbit.web.domains.MemberDTO">
+      update member set pw = #{pw}, email = #{email} where mem_id = #{id} 
+   </update>
+   <delete id="delete" parameterType="com.hanbit.web.domains.MemberDTO">
+      delete member where mem_id = #{id}
+   </delete>
+   </mapper>

@@ -1,5 +1,7 @@
 package com.hanbit.web.util;
 
+import com.hanbit.web.contants.Values;
+
 /**
  * @date   :2016. 7. 5.
  * @author :ckan
@@ -11,12 +13,12 @@ public class DatabaseFactory {
 		String driver = "",url = "";
 		switch (vendor) {
 		case ORACLE:
-			driver = Constants.ORACLE_DRIVER;
-			url = Constants.ORACLE_URL;
+			driver = Values.ORACLE_DRIVER;
+			url = Values.ORACLE_URL;
 			break;
 		case MYSQL:
-			driver = Constants.MYSQL_DRIVER;
-			url = Constants.MYSQL_URL;
+			driver = Values.MYSQL_DRIVER;
+			url = Values.MYSQL_URL;
 			break;
 		case MSSQL:break;
 		case MARIADB:break;

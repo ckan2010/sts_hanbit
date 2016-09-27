@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
+import com.hanbit.web.domains.Retval;
 @Repository
 public interface MemberMapper {
 	public int insert(MemberDTO stu);
@@ -15,10 +16,11 @@ public interface MemberMapper {
 	public List<MemberDTO> list(Command command);
 	public MemberDTO findOne(Command command);
 	public List<?> findByName(String name);
-	public int count();
+	public Retval count();
 	public boolean login(MemberDTO param);
 	public int findByGender(String gender);
 	public int findId(String id);
 	public int findPw(MemberDTO mem);
 	public int existId(String id);
+	public List<?> find(Command command);
 }

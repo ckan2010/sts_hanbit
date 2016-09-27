@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.hanbit.web.controllers.MemberController;
 import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
+import com.hanbit.web.domains.Retval;
 import com.hanbit.web.domains.SubjectDTO;
 import com.hanbit.web.mappers.MemberMapper;
 import com.hanbit.web.services.MemberService;
@@ -56,9 +57,15 @@ public class MemberServiceImpl implements MemberService{
 		}
 		return msg;
 	}
-	public int count() {
+	public Retval count() {		
 		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
-		return mapper.count();
+		Retval retval = mapper.count();
+		if(retval==null){
+			System.out.println("Retval 은 null");
+		}else{
+			System.out.println("Retval 은 null 아님");
+		}
+		return retval;
 	}
 	@Override
 	public void logout(MemberDTO mem) {
@@ -95,7 +102,7 @@ public class MemberServiceImpl implements MemberService{
 		logger.info("MemberService login ID = {}",member.getId());
 		Command command = new Command();
 		command.setKeyword(member.getId());
-		command.setOption("mem_id");
+		command.setKeyField("mem_id");
 		MemberDTO mem = this.findOne(command);
 		if (member.getPw().equals(mem.getPw())) {
 			logger.info("MemberService LOGIN IS {}","SUCCESS");
@@ -115,5 +122,10 @@ public class MemberServiceImpl implements MemberService{
 	public List<MemberDTO> list(Command command) {
 		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
 		return mapper.list(command);
+	}
+	@Override
+	public List<?> find(Command command) {
+		MemberMapper mapper = sqlSession.getMapper(MemberMapper.class);
+		return mapper.find(command);
 	}
 }

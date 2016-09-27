@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.hanbit.web.contants.Values;
+
 import java.sql.Statement;
 
 /**
@@ -21,8 +24,8 @@ public class JDBCTest {
 		String sql = "select * from member where mem_id = 'haesu' ",result="";
 		List<String> list = new ArrayList<String>();
 		try {
-			Class.forName(Constants.ORACLE_DRIVER);
-			con = DriverManager.getConnection(Constants.ORACLE_URL,Constants.USER_ID,Constants.USER_PW);
+			Class.forName(Values.ORACLE_DRIVER);
+			con = DriverManager.getConnection(Values.ORACLE_URL,Values.USER_ID,Values.USER_PW);
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(sql);
 			/*sql = "select * from test"; 

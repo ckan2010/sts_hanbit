@@ -9,11 +9,12 @@ import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
-import com.hanbit.web.util.Constants;
+import com.hanbit.web.contants.Values;
 
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 /**
  * @date   :2016. 6. 17.
  * @author :ckan
@@ -21,6 +22,7 @@ import lombok.Setter;
  * @story  :
  */
 @Component
+@ToString
 @Data
 public class MemberDTO implements Serializable{
 	private static final long serialVersionUID = 1L;

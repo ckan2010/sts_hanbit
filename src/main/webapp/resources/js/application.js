@@ -216,7 +216,7 @@ var DETAIL_FORM =
 	+'<div id="bt_box"><input id="go_update" type="submit" value="정보수정하러가기" /><input id="unregist" type="submit" value="회원탈퇴" /></div></div>'
 	;
 var UNREGIST_FORM =
-	+'<div class="box"><h3>탈퇴하시려면 비밀번호를 다시 입력해 주세요</h3>'
+	 '<div class="box"><h3>탈퇴하시려면 비밀번호를 다시 입력해 주세요</h3>'
 	+'<form id="member_delete_form" class="navbar-form navbar-center" role="search">'
 	+'<div class="form-group"><input id="ch_pw" type="password" class="form-control" placeholder="PASSWORD">'
 	+'</div><button id="unregist_bt" type="submit" class="btn btn-default">탈 퇴</button></form></div>';
@@ -311,7 +311,6 @@ var member = (function(){
 					data : {'id':$('#id').val(),'pw':$('#pw').val()},
 					dataType: 'json',
 					success : function(data){
-						
 						if(data.id === 'NONE'){
 							alert('ID 나 비번이 일치하지 않습니다.');
 						}else{
@@ -534,6 +533,7 @@ var STUDENT_MAIN = '<section id="user_content_service" class="box section-padded
 	+'</div></div></div></div></section>';
 var user = (function(){
 	var init = function(){onCreate();};
+	
 	var setContentView = function(){
 		$('#member_content_img_home').attr('src',app.img()+'/home.png');
 		$('#user_header #logout').addClass('cursor');
@@ -630,6 +630,10 @@ var admin = (function() {
 					alert('관리자 비번이 틀립니다.');
 				}
 			}
+		},
+		member_list : function(){
+			alert('0000');
+			location.href = app.context()+'/member/list/1';
 		}
     };
 })();

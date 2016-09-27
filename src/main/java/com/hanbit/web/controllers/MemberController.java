@@ -19,37 +19,38 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
+import com.hanbit.web.contants.Values;
 import com.hanbit.web.domains.Command;
 import com.hanbit.web.domains.MemberDTO;
 import com.hanbit.web.domains.Retval;
 import com.hanbit.web.service.impl.MemberServiceImpl;
+import com.hanbit.web.util.Pagination;
 
 @Controller // has a 관계
 @SessionAttributes({"user","context","js","css","img"})
 @RequestMapping("/member")
 public class MemberController {
 	private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
-	public static int PG_SIZE = 5;
 	@Autowired MemberServiceImpl service;
 	@Autowired MemberDTO member;
 	@Autowired Command command;
 	@Autowired Retval retval;
-	@RequestMapping("/search/{option}/{keyword}")
-	public @ResponseBody MemberDTO find(@PathVariable("option") String option,
+	@RequestMapping("/search/{keyField}/{keyword}")
+	public @ResponseBody MemberDTO find(@PathVariable("keyField") String keyField,
 			@PathVariable("keyword")String keyword,HttpSession session){
-		logger.info("TO SERCH OPTION IS {}",option);
+		logger.info("TO SERCH KEYFIELD IS {}",keyField);
 		logger.info("TO SERCH KEYWORD IS {}",keyword);
 		if(keyword.equals("-zzzzzzz")){
 			return (MemberDTO) session.getAttribute("user");
 		}
 		command.setKeyword(keyword);
-		command.setOption(option);
+		command.setKeyField(keyField);
 		return service.findOne(command);
 	}
-	@RequestMapping(value="/count/{option}",consumes="application/json")
-	public Model count(@PathVariable("option") String option,
+	@RequestMapping(value="/count/{keyField}",consumes="application/json")
+	public Model count(@PathVariable("keyField") String keyField,
 			Model model){
-		logger.info("TO COUNT OPTION IS {}",option);
+		logger.info("TO COUNT KEYFIELD IS {}",keyField);
 		model.addAttribute("count", service.count());
 		return model;
 	}
@@ -165,35 +166,59 @@ public class MemberController {
 		return "redirect:/";
 	}
 	@RequestMapping("/list/{pgNum}")
-	public String list(@PathVariable String strPagNum,
+	public String list(@PathVariable String pgNum,
 			           Model model) {
-		logger.info("GO TO {}","list");
-		List<MemberDTO> list = new ArrayList<MemberDTO>();
-		int pgNum = Integer.parseInt(strPagNum);
-		int totCount = service.count();
-		int startRow = 0;
-		int endRow = 0;
-		int pgCount = totCount/PG_SIZE;
-		if (totCount%PG_SIZE==0) {
-			startRow = 0;
-			endRow = 0;
-		} else {
-			startRow = 0;
-			endRow = 0;
-		}
-		command.setStart(startRow);
-		command.setEnd(endRow);
+		logger.info("LIST PGNUM {}",pgNum);
+		int[] rows = new int[2];
+		int[] pages = new int[3];
+		Retval r = service.count();
+		int totCount = r.getCount();
+		pages = this.getPages(totCount, Integer.parseInt(pgNum));
+		logger.info("TOT COUNT {}",totCount);
+		rows = Pagination.getStartRow(totCount, Integer.parseInt(pgNum), Values.PG_SIZE);
+		command.setStart(rows[0]);
+		command.setEnd(rows[1]);
+		
 		model.addAttribute("list",service.list(command));
+		model.addAttribute("pgSize",Values.PG_SIZE);
+		model.addAttribute("totCount",totCount);
+		model.addAttribute("totPg",pages[2]);
+		model.addAttribute("startPg",pages[0]);
+		model.addAttribute("pgNum",Integer.parseInt(pgNum));
+		model.addAttribute("lastPg",pages[1]);
 		return "admin:member/list.tiles";
 	}
+	public int[] getPages(int totCount,int pgNum2){
+		int[] pages = new int[3];
+		int startPg=0,lastPg=0,totPg=0;
+		if (totCount % Values.PG_SIZE == 0) {
+			totPg = totCount/Values.PG_SIZE;
+		}else{
+			totPg = totCount/Values.PG_SIZE + 1;
+		}
+		startPg = pgNum2-((pgNum2-1)%Values.PG_SIZE);
+		if (startPg + Values.PG_SIZE-1 <= totPg) {
+			lastPg = startPg + Values.PG_SIZE -1;
+		} else {
+			lastPg = totPg;
+		}
+		pages[0] = startPg;
+		pages[1] = lastPg;
+		pages[2] = totPg;
+		return pages;
+	}
+	@SuppressWarnings("unchecked")
 	@RequestMapping("/search")
-	public String search(@RequestParam(value="pgNum") String strPgNum,
+	public String search(@RequestParam(value="keyField") String keyField,
 						 @RequestParam(value="keyword") String keyword,
-						 @RequestParam(value="pgNum") String pgNum,
 			           Model model) {
-		logger.info("GO TO {}","Search");		
+		logger.info("SEARCH keyField {}",keyField);		
+		logger.info("SEARCH keyword {}",keyword);		
 		List<MemberDTO> list = new ArrayList<MemberDTO>();
-		//service.list();
+		command.setKeyField(keyField);
+		command.setKeyword(keyword);
+		list = (List<MemberDTO>) service.find(command);
+		System.out.println(list);
 		model.addAttribute("list",list);
 		return "admin:member/list.tiles";
 	}
