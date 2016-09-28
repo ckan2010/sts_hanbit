@@ -66,8 +66,8 @@ order by t2.seq asc
       from    member where ${keyField} = #{keyword}
    </select>
    <insert id="insert" parameterType="com.hanbit.web.domains.MemberDTO">
-      insert into member(mem_id,pw,name,ssn,email,phone,gender,reg_date)
-      values(#{id},#{pw},#{name},#{ssn},#{email},#{phone},#{gender},#{regDate})
+      insert into member(mem_id,pw,name,ssn,email,phone,gender,reg_date,PROFILE_IMG,MAJOR_SEQ)
+      values(#{id},#{pw},#{name},#{ssn},#{email},#{phone},#{gender},#{regDate},#{profileImg},#{majorSeq})
    </insert>
    <update id="update" parameterType="com.hanbit.web.domains.MemberDTO">
       update member set pw = #{pw}, email = #{email} where mem_id = #{id} 

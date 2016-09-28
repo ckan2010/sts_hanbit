@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.annotation.Untainted;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class MemberController {
 	@Autowired MemberDTO member;
 	@Autowired Command command;
 	@Autowired Retval retval;
-	@RequestMapping("/search/{keyField}/{keyword}")
+	/*@RequestMapping("/search/{keyField}/{keyword}")
 	public @ResponseBody MemberDTO find(@PathVariable("keyField") String keyField,
 			@PathVariable("keyword")String keyword,HttpSession session){
 		if(keyword.equals("-zzzzzzz")){
@@ -47,7 +48,7 @@ public class MemberController {
 		command.setKeyword(keyword);
 		command.setKeyField(keyField);
 		return service.findOne(command);
-	}
+	}*/
 	@RequestMapping(value="/count/{keyField}",consumes="application/json")
 	public Model count(@PathVariable("keyField") String keyField,
 			Model model){
@@ -88,6 +89,7 @@ public class MemberController {
 		logger.info("SIGN UP PHONE = {}",param.getPhone());
 		String[] gen = param.getSsn().split("-");
 		String gender="",regDate =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis()));
+		int majorSeq=1000;
         switch (Integer.parseInt(gen[1])) {
 		case 1: case 3: case 5: case 7:
 			gender="MALE";
@@ -98,6 +100,8 @@ public class MemberController {
 		}
 		param.setGender(gender);
 		param.setRegDate(regDate);
+		param.setMajorSeq(majorSeq);
+		param.setProfileImg(param.getId()+".jpg");
 		logger.info("SIGN UP GENDER = {}",param.getGender());
 		logger.info("SIGN UP REGDATE = {}",param.getRegDate());
 		retval.setMessage(service.open(param));
@@ -160,8 +164,7 @@ public class MemberController {
 		return "redirect:/";
 	}
 	@RequestMapping("/list/{pgNum}")
-	public @ResponseBody HashMap<String,Object> list(@PathVariable String pgNum,
-			           Model model) {
+	public @ResponseBody HashMap<String,Object> list(@PathVariable String pgNum) {
 		int[] rows = new int[2];
 		int[] pages = new int[3];
 		HashMap<String,Object> map = new HashMap<String,Object>();
@@ -171,14 +174,6 @@ public class MemberController {
 		rows = Pagination.getRows(totCount, Integer.parseInt(pgNum), Values.PG_SIZE);
 		command.setStart(rows[0]);
 		command.setEnd(rows[1]);
-		
-		/*model.addAttribute("list",service.list(command));
-		model.addAttribute("pgSize",Values.PG_SIZE);
-		model.addAttribute("totCount",totCount);
-		model.addAttribute("totPg",pages[2]);
-		model.addAttribute("startPg",pages[0]);
-		model.addAttribute("pgNum",Integer.parseInt(pgNum));
-		model.addAttribute("lastPg",pages[1]);*/
 		map.put("list", service.list(command));
 		map.put("pgSize",Values.PG_SIZE);
 		map.put("totCount",totCount);
@@ -189,32 +184,33 @@ public class MemberController {
 		map.put("groupSize", Values.GROUP_SIZE);
 		return map;
 	}
-	@SuppressWarnings("unchecked")
-	@RequestMapping("/search")
-	public String search(@RequestParam(value="keyField") String keyField,
-						 @RequestParam(value="keyword") String keyword,
-			           Model model) {
+	@Untainted
+	@RequestMapping("/search/{keyField}/{keyword}")
+	public @ResponseBody HashMap<String,Object> search(@PathVariable("keyField") String keyField,
+			@PathVariable("keyword")String keyword) {
 		logger.info("SEARCH keyField {}",keyField);		
-		logger.info("SEARCH keyword {}",keyword);		
+		logger.info("SEARCH keyword {}",keyword);	
+		int[] rows = new int[2];
+		int[] pages = new int[3];
+		HashMap<String,Object> map = new HashMap<String,Object>();
 		List<MemberDTO> list = new ArrayList<MemberDTO>();
-		
 		command.setKeyField(keyField);
 		command.setKeyword(keyword);
 		list = (List<MemberDTO>) service.find(command);
-		int[] pages = new int[3];
-		int[] rows = new int[2];
 		int totCount = list.size();
 		pages = Pagination.getPages(totCount, 1);
 		rows = Pagination.getRows(totCount, 1, Values.PG_SIZE);
-		model.addAttribute("pgSize",Values.PG_SIZE);
-		model.addAttribute("totCount",totCount);
-		model.addAttribute("totPg",pages[2]);
-		model.addAttribute("startPg",pages[0]);
-		model.addAttribute("pgNum",1);
-		model.addAttribute("lastPg",pages[1]);
-		System.out.println(list);
-		model.addAttribute("list",list);
-		return "admin:member/list.tiles";
+		command.setStart(rows[0]);
+		command.setEnd(rows[1]);
+		map.put("list", list);
+		map.put("pgSize",Values.PG_SIZE);
+		map.put("totCount",totCount);
+		map.put("totPg",pages[2]);
+		map.put("startPg",pages[0]);
+		map.put("pgNum",1);
+		map.put("lastPg",pages[1]);
+		map.put("groupSize", Values.GROUP_SIZE);
+		return map;
 	}
 	@RequestMapping("/find_by")
 	public String find_by() {

@@ -8,13 +8,13 @@
 */	
 var app = (function(){
 	var init = function(context) {
-		session.init(context);
-		onCreate();
+		session.init(context);		
 		member.init();
 		user.init();
 		grade.init();
 		nav.init();
 		admin.init();
+		onCreate();
 	};
 	var context = function(){return session.getContextPath();};
 	var js = function(){return session.getJavascriptPath('js');};
@@ -277,7 +277,6 @@ var member = (function(){
 		$('#delete').click(function(){controller.move('member','delete');});
 		$('#login').click(function(){controller.move('member','login');});
 		$('#logout').click(function(){controller.move('member','logout');});
-		/*$('#list').click(function(){controller.move('member','list');});*/
 		$('#find_by').click(function(){controller.move('member','find_by');});
 		$('#count').click(function(){controller.move('member','count');});
 		$('#member_find_form input[type="submit"]').click(function(){$('#member_find_form').submit();});
@@ -642,11 +641,19 @@ var user = (function(){
 	};
 	return {
 		init : init,
-		student_list : function(pgNum){
+		student_list : function(keyField,keyword){
 			$('#admin_header').empty().load(app.context()+'/admin/header');
 			$('#admin_nav').empty().load(app.context()+'/admin/nav');
-			$('#admin_article').empty();//html(STUDENT_LIST_TH);
-			$.getJSON(app.context()+'/member/list/'+pgNum,function(data){
+			$('#admin_article').empty();			
+			var url='';
+			if(keyField==='list'){
+				url=app.context()+'/member/list/'+keyword;
+				pgNum = keyword;
+			}else{
+				url=app.context()+'/member/search/'+keyField+'/'+keyword;
+				pgNum = 1;
+			}
+			$.getJSON(url,function(data){
 				var frame = '';
 				var startPg = data.startPg;
 				var lastPg = data.lastPg;
@@ -691,51 +698,54 @@ var user = (function(){
 					});
 				}
 				student_list += '</tbody></table>';
-				var pagination='<nav aria-label="Page navigation" style="margin:0 auto;"><ul class="pagination">';
-				if((startPg-lastPg) > 0){
-					pagination += 
-						+'<li>'
-						+'<a href="'+app.context()+'/member/list/'+(startPg-lastPg)+'" aria-label="Previous">'
-						+'<span aria-hidden="true">&laquo;</span>'
-						+'</a>'
-						+'</li>';
-				}
-				for(var i=startPg; i<=lastPg; i++){
-					if(i==pgNum){
-						pagination +='<font color="red">'+i+'</font>';
-					}else{
-						pagination += '<a href="'+app.context()+'/member/list/'+i+'">'+i+'</a>';
-					}
-				}
-				if(startPg + pgSize <= totPg){
-					pagination += 
-						'<li>'
-						+'<a href="'+app.context()+'/member/list/'+(startPg-pgSize)+'}" aria-label="Next">'
-						+ '<span aria-hidden="true">&laquo;</span>'
-						+'</a>'
-						+'</li>';
-				}
-				pagination += '</ul></nav>'
-				var search_form =
-					'<div align="center">'
-					+'<form action="'+app.context()+'/member/search" method="post">'
-					+'<select name="keyField" id="keyField">'
-					+'<option value="name" selected>이름</option>'
-					+'<option value="mem_id">ID</option>'
-					+'</select>'
-					+'<input type="text" name="keyword" id="keyword">'
-					+'<input id="find_submit" type="submit" name="검 색">'
-					+'</form>'
-					+'</div>'
-					+'</div>'
-					+'</div>';				
-				frame += student_list;
-				frame += pagination;
-				frame += search_form;
-				$('#admin_article').html(frame);
+				var pagination= 
+	                   '<nav aria-label="Page navigation">'
+	                  +'<ul class="pagination">';
+	                  if((startPg-lastPg) > 0){
+	                     pagination += 
+	                        +'<li>'
+	                        +'<a href="'+app.context()+'/member/list/'+(startPg-lastPg)+'" aria-label="Previous">'
+	                        +'<span aria-hidden="true">&laquo;</span>'
+	                        +'</a>'
+	                        +'</li>';
+	                  }
+	                  for(var i=startPg; i<=lastPg; i++){
+	                     if(i==pgNum){
+	                        pagination +='<font color="red">'+i+'</font>';
+	                     }else{
+	                        pagination += '<a href="#" onclick="user.student_list(\'list\','+i+')">'+i+'</a>';
+	                     }
+	                  }
+	                  if(startPg + pgSize <= totPg){
+	                     pagination += 
+	                        '<li>'
+	                        +'<a href="'+app.context()+'/member/list/'+(startPg-pgSize)+'}" aria-label="Next">'
+	                        + '<span aria-hidden="true">&raquo;</span>'
+	                        +'</a>'
+	                        +'</li>';
+	                  }
+	                  pagination += '</ul></nav>'
+	                  var search_form =
+	                     '<div align="center">'
+	                     +'<form >'
+	                     +'<select name="keyField" id="keyField">'
+	                     +'<option value="name" selected>이름</option>'
+	                     +'<option value="mem_id">ID</option>'
+	                     +'</select>'
+	                     +'<input type="text" name="keyword" id="keyword">'
+	                     +'<input type="submit" name="검 색" id="find_submit">'
+	                     +'</form>'
+	                     +'</div>'
+	                     +'</div>'
+	                     +'</div>'
+	                     +'</section></div>';
+	               frame += student_list;
+	               frame += pagination;
+	               frame += search_form;
+	               $('#admin_article').html(frame);
 				$('#find_submit').click(function(){
 					if($('#keyword').val().length>0){
-						user.find_student($('#keyword').val());
+						user.find_student($('#keyField').val(),$('#keyword').val());
 					}else{
 						alert('검색어를 입력해 주세요');
 						$('#keyword').focus();
@@ -744,8 +754,8 @@ var user = (function(){
 				});
 			});
 		},
-		find_student : function(keyword){
-			alert('검색어 : '+keyword);
+		find_student : function(keyField,keyword){
+			 user.student_list(keyField,keyword);
 		}
 	};
 })();
@@ -777,7 +787,7 @@ var admin = (function() {
     };
     var onCreate = function(){
     	setContentView();
-    	$('#admin_nav #member_mgmt #list').click(function(){user.student_list(1);});
+    	$('#admin_nav #member_mgmt #list').click(function(){user.student_list('list',1);});
     	$('#admin_nav #member_mgmt #find_by').click(function(){controller.move('member','find');});
     	$('#admin_nav #member_mgmt #count').click(function(){controller.move('member','count');});
     	$('#admin_nav #account_mgmt #list').click(function(){controller.move('account','list');});
