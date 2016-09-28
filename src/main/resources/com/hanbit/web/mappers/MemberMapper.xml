@@ -19,6 +19,7 @@ from (select rownum seq
                    m.major_seq majorSeq,
                    substrb(m.ssn,1,6) birth
             from   member m
+            where  m.role = 'STUDENT'
             order by reg_date desc
            ) t
      ) t2
@@ -65,8 +66,8 @@ order by t2.seq asc
       from    member where ${keyField} = #{keyword}
    </select>
    <insert id="insert" parameterType="com.hanbit.web.domains.MemberDTO">
-      insert into member(id,pw,name,ssn,email,phone)
-      values(#{id},#{pw},#{name},#{ssn},#{email},#{phone})
+      insert into member(mem_id,pw,name,ssn,email,phone,gender,reg_date)
+      values(#{id},#{pw},#{name},#{ssn},#{email},#{phone},#{gender},#{regDate})
    </insert>
    <update id="update" parameterType="com.hanbit.web.domains.MemberDTO">
       update member set pw = #{pw}, email = #{email} where mem_id = #{id} 

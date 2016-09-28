@@ -277,7 +277,7 @@ var member = (function(){
 		$('#delete').click(function(){controller.move('member','delete');});
 		$('#login').click(function(){controller.move('member','login');});
 		$('#logout').click(function(){controller.move('member','logout');});
-		$('#list').click(function(){controller.move('member','list');});
+		/*$('#list').click(function(){controller.move('member','list');});*/
 		$('#find_by').click(function(){controller.move('member','find_by');});
 		$('#count').click(function(){controller.move('member','count');});
 		$('#member_find_form input[type="submit"]').click(function(){$('#member_find_form').submit();});
@@ -326,7 +326,7 @@ var member = (function(){
 		},
 		pub_sign_up_form : function(){
 			$('#pub_article').empty().append(SIGN_UP_FORM);
-			app.init();			
+			member.init();			
 			$('#check_dup').click(function(){
 				if(util.pwChecker($('#id').val())==='yes'){
 					$.ajax({
@@ -334,10 +334,10 @@ var member = (function(){
 						success : function(data){
 							if(data.flag==="TRUE"){
 								$('#id_box').html('<input type="text" id="id" placeholder="'+data.message+'"><input type="button" id="re_check" name="check_dup" value="다시 조회"/>');
-								app.init();
+								member.init();
 							}else{
 								$('#id_box').html('<input type="text" id="id" value="'+data.temp+'"><input type="button" id="use_input_id" name="check_dup" value="그대로 사용"/>');
-								app.init();								
+								member.init();								
 								$('#bt_join').click(function(e){
 									e.preventDefault();
 									var join_info = {
@@ -531,6 +531,79 @@ var STUDENT_MAIN = '<section id="user_content_service" class="box section-padded
 	+'<input type="hidden" name="major_subject_3">'
 	+'<input type="button" data-toggle="modal" data-target="#modal1" class="btn btn-blue-fill" value="과목 정보 보기"/>'
 	+'</div></div></div></div></section>';
+var STUDENT_LIST_TH = '<div class="box2" style="padding-top:0;width:90%">'
++'<ul class="list-group">'
++'<li class="list-group-item">총학생수: ${totCount}</li>'
++'</ul>'
++'<div class="panelpanel-primary">'
++'<div class="panel-heading">학생리스트</div>'
++'<table id="member_list_table">'
++'<tr>'
++'<th>ID</th>'
++'<th>이름</th>'
++'<th>등록일</th>'
++'<th>생년월일</th>'
++'<th>이메일</th>'
++'<th>전화번호</th>'
++'<th>성적</th>'
++'</tr>'
++'<tbody>';
+var STUDENT_LIST_ROW =
+/*'<c:forEachitems="${list}"var="member">'*/
+ '<tr>'
++'<td>${member.id}</td>'
++'<td><aclass="name">${member.name}</a></td>'
++'<td>${member.regDate}</td>'
++'<td>${member.birth}</td>'
++'<td>${member.email}</td>'
++'<td>${member.phone}</td>'
++'<td><aclass="regist">등록</a>/<aclass="update">수정</a></td>'
++'</tr>';
+/*+'</c:forEach>'*/
+var STUDENT_LIST_END = 
+ '</tbody>'
++'</table>';
+var aaa = 
+ '<navaria-label="Pagenavigation">'
++'<ulclass="pagination">'
++'<c:iftest="${startPg-pgSizegt0}">'
++'<li>'
++'<ahref="${context}/member/list/${startPg-pgSize}"aria-label="Previous">'
++'<spanaria-hidden="true">&laquo;</span>'
++'</a>'
++'</li>'
++'</c:if>'
++'<c:forEach begin="${startPg}"end="${lastPg}"step="1"varStatus="i">'
++'<c:choose>'
++'<c:whentest="${i.index==pgNum}">'
++'<fontcolor="red">${i.index}</font>'
++'</c:when>'
++'<c:otherwise>'
++'<ahref="${context}/member/list/${i.index}">${i.index}</a>'
++'</c:otherwise>'
++'</c:choose>'
++'</c:forEach>'
++'<c:iftest="${startPg+pgSizeletotPg}">'
++'<li>'
++'<ahref="${context}/member/list/${startPg-pgSize}"aria-label="Next">'
++'<span aria-hidden="true">&raquo;</span>'
++'</a>'
++'</li>'
++'</c:if>'
++'</ul>'
++'</nav>'
++'<div align="center">'
++'<form action="${context}/member/search"method="post">'
++'<select name="keyField" id="">'
++'<option value="name"selected>이름</option>'
++'<option value="mem_id">ID</option>'
++'</select>'
++'<input type="text"name="keyword">'
++'<input type="submit"name="검색">'
++'</form>'
++'</div>'
++'</div>'
++'</div>';
 var user = (function(){
 	var init = function(){onCreate();};
 	
@@ -568,7 +641,112 @@ var user = (function(){
 		$("#user_header #grade li:eq(1) a").click(function(){controller.move('grade','find');});
 	};
 	return {
-		init : init
+		init : init,
+		student_list : function(pgNum){
+			$('#admin_header').empty().load(app.context()+'/admin/header');
+			$('#admin_nav').empty().load(app.context()+'/admin/nav');
+			$('#admin_article').empty();//html(STUDENT_LIST_TH);
+			$.getJSON(app.context()+'/member/list/'+pgNum,function(data){
+				var frame = '';
+				var startPg = data.startPg;
+				var lastPg = data.lastPg;
+				var pgSize = data.pgSize;
+				var totPg = data.totPg;
+				var groupSize = data.groupSize;
+				console.log('스타트페이지 : '+startPg);
+				console.log('라스트페이지 : '+lastPg);
+				console.log('페이지사이즈 : '+pgSize);
+				console.log('총페이지 : '+totPg);
+				console.log('그룹사이즈 : '+groupSize);
+				var student_list = '<div class="box2" style="padding-top:0;width:90%">';
+					student_list +='<ul class="list-group"><li class="list-group-item">총학생수: '+data.totCount+'</li>';
+					student_list += '</ul>'
+					+'<div class="panelpanel-primary">'
+					+'<div class="panel-heading">학생리스트</div>'
+					+'<table id="member_list_table">'
+					+'<tr>'
+					+'<th>ID</th>'
+					+'<th>이름</th>'
+					+'<th>등록일</th>'
+					+'<th>생년월일</th>'
+					+'<th>이메일</th>'
+					+'<th>전화번호</th>'
+					+'<th>성적</th>'
+					+'</tr>'
+					+'<tbody>';
+				if (data.count==0) {
+					student_list +='<tr><td colspan=7>등록된 학생이 없습니다.</td></tr>';
+				} else {
+					$.each(data.list, function(i,member){
+						student_list +=
+							 '<tr>'
+							+'<td>'+member.id+'</td>'
+							+'<td><a class="name">'+member.name+'</a></td>'
+							+'<td>'+member.regDate+'</td>'
+							+'<td>'+member.birth+'</td>'
+							+'<td>'+member.email+'</td>'
+							+'<td>'+member.phone+'</td>'
+							+'<td><a class="regist">등록</a> / <a class="update">수정</a></td>'
+							+'</tr>';
+					});
+				}
+				student_list += '</tbody></table>';
+				var pagination='<nav aria-label="Page navigation" style="margin:0 auto;"><ul class="pagination">';
+				if((startPg-lastPg) > 0){
+					pagination += 
+						+'<li>'
+						+'<a href="'+app.context()+'/member/list/'+(startPg-lastPg)+'" aria-label="Previous">'
+						+'<span aria-hidden="true">&laquo;</span>'
+						+'</a>'
+						+'</li>';
+				}
+				for(var i=startPg; i<=lastPg; i++){
+					if(i==pgNum){
+						pagination +='<font color="red">'+i+'</font>';
+					}else{
+						pagination += '<a href="'+app.context()+'/member/list/'+i+'">'+i+'</a>';
+					}
+				}
+				if(startPg + pgSize <= totPg){
+					pagination += 
+						'<li>'
+						+'<a href="'+app.context()+'/member/list/'+(startPg-pgSize)+'}" aria-label="Next">'
+						+ '<span aria-hidden="true">&laquo;</span>'
+						+'</a>'
+						+'</li>';
+				}
+				pagination += '</ul></nav>'
+				var search_form =
+					'<div align="center">'
+					+'<form action="'+app.context()+'/member/search" method="post">'
+					+'<select name="keyField" id="keyField">'
+					+'<option value="name" selected>이름</option>'
+					+'<option value="mem_id">ID</option>'
+					+'</select>'
+					+'<input type="text" name="keyword" id="keyword">'
+					+'<input id="find_submit" type="submit" name="검 색">'
+					+'</form>'
+					+'</div>'
+					+'</div>'
+					+'</div>';				
+				frame += student_list;
+				frame += pagination;
+				frame += search_form;
+				$('#admin_article').html(frame);
+				$('#find_submit').click(function(){
+					if($('#keyword').val().length>0){
+						user.find_student($('#keyword').val());
+					}else{
+						alert('검색어를 입력해 주세요');
+						$('#keyword').focus();
+						return false
+					}
+				});
+			});
+		},
+		find_student : function(keyword){
+			alert('검색어 : '+keyword);
+		}
 	};
 })();
 /*
@@ -599,7 +777,7 @@ var admin = (function() {
     };
     var onCreate = function(){
     	setContentView();
-    	$('#admin_nav #member_mgmt #list').click(function(){controller.move('member','list');});
+    	$('#admin_nav #member_mgmt #list').click(function(){user.student_list(1);});
     	$('#admin_nav #member_mgmt #find_by').click(function(){controller.move('member','find');});
     	$('#admin_nav #member_mgmt #count').click(function(){controller.move('member','count');});
     	$('#admin_nav #account_mgmt #list').click(function(){controller.move('account','list');});
@@ -630,10 +808,6 @@ var admin = (function() {
 					alert('관리자 비번이 틀립니다.');
 				}
 			}
-		},
-		member_list : function(){
-			alert('0000');
-			location.href = app.context()+'/member/list/1';
 		}
     };
 })();

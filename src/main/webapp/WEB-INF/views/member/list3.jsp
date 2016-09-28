@@ -66,7 +66,7 @@
 	<form action="${context}/member/search" method="post">
 		<select name="keyField" id="">
 			<option value="name" selected>이름</option>
-			<option value="id">ID</option>			
+			<option value="mem_id">ID</option>			
 		</select>
 		<input type="text" name="keyword">
 		<input type="submit" name="검 색">

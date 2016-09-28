@@ -1,6 +1,9 @@
 package com.hanbit.web.controllers;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -38,8 +41,6 @@ public class MemberController {
 	@RequestMapping("/search/{keyField}/{keyword}")
 	public @ResponseBody MemberDTO find(@PathVariable("keyField") String keyField,
 			@PathVariable("keyword")String keyword,HttpSession session){
-		logger.info("TO SERCH KEYFIELD IS {}",keyField);
-		logger.info("TO SERCH KEYWORD IS {}",keyword);
 		if(keyword.equals("-zzzzzzz")){
 			return (MemberDTO) session.getAttribute("user");
 		}
@@ -58,16 +59,12 @@ public class MemberController {
 	public @ResponseBody MemberDTO login(@RequestParam("id") String id,
 			@RequestParam("pw") String pw,
 			HttpSession session) {
-		logger.info("TO LOGIN ID IS {}",id);
-		logger.info("TO LOGIN PW IS {}",pw);
 		member.setId(id);
 		member.setPw(pw);
 		MemberDTO user = service.login(member);
 		if (user.getId().equals("NONE")) {
-			logger.info("Controller LOGIN {}","FAIL");
 			return user;
 		}else{
-			logger.info("Controller LOGIN {}","SUCCESS");
 			session.setAttribute("user",user);
 			return user;
 		}
@@ -75,12 +72,10 @@ public class MemberController {
 	}
 	@RequestMapping("/logined/header")
 	public String loginedHeader(){
-		logger.info("TO COUNT CONDITION IS : {}","LOGINED_HEADER");
 		return "user/header.jsp";
 	}
 	@RequestMapping("/main")
 	public String moveMain() {
-		logger.info("GO TO {}","main");
 		return "admin:member/content.tiles";
 	}
 	@RequestMapping(value="/signup",method=RequestMethod.POST,consumes="application/json")
@@ -91,9 +86,22 @@ public class MemberController {
 		logger.info("SIGN UP SSN = {}",param.getSsn());
 		logger.info("SIGN UP EMAIL = {}",param.getEmail());
 		logger.info("SIGN UP PHONE = {}",param.getPhone());
+		String[] gen = param.getSsn().split("-");
+		String gender="",regDate =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis()));
+        switch (Integer.parseInt(gen[1])) {
+		case 1: case 3: case 5: case 7:
+			gender="MALE";
+			break;
+		default:
+			gender="FEMALE";
+			break;
+		}
+		param.setGender(gender);
+		param.setRegDate(regDate);
+		logger.info("SIGN UP GENDER = {}",param.getGender());
+		logger.info("SIGN UP REGDATE = {}",param.getRegDate());
 		retval.setMessage(service.open(param));
 		//retval.setMessage("success");
-		logger.info("Message = {}",retval.getMessage());
 		return retval;
 	}
 	@RequestMapping("/check_dup/{id}")
@@ -107,8 +115,6 @@ public class MemberController {
 			retval.setMessage("사용가능 ID입니다.");
 			retval.setTemp(id);
 		}
-		logger.info("RETURN VALUE IS {}",retval.getFlag());
-		logger.info("RETURN VALUE IS {}",retval.getMessage());
 		return retval;
 	}
 	@RequestMapping("/a_detail")
@@ -124,11 +130,6 @@ public class MemberController {
 	}
 	@RequestMapping(value="/update",method=RequestMethod.POST,consumes="application/json")
 	public @ResponseBody  Retval update(@RequestBody MemberDTO param,HttpSession session) {
-		logger.info("MEMBER UPDATE {}","EXEUTE");
-		logger.info("MEMBER UPDATE ID = {}",param.getId());
-		logger.info("MEMBER UPDATE PW = {}",param.getPw());		
-		logger.info("MEMBER UPDATE EMAIL = {}",param.getEmail());
-		logger.info("MEMBER UPDATE PHONE = {}",param.getPhone());
 		MemberDTO temp = (MemberDTO) session.getAttribute("user");
 		temp.setPw(param.getPw());
 		temp.setEmail(param.getEmail());
@@ -142,14 +143,9 @@ public class MemberController {
 	@RequestMapping(value="/delete",method=RequestMethod.POST)
 	public @ResponseBody Retval delete(@RequestParam("pw") String pw,
 			                           HttpSession session) {
-		logger.info("GO TO {}","delete");
-		logger.info("DELETE IS PW {}",pw);		
 		MemberDTO user = (MemberDTO) session.getAttribute("user");	
-		logger.info("MemberDTO IS PW {}",user.getPw());
 		if (pw.equals(user.getPw())) {
-			logger.info("PW 가 같으면");
 			String msg = service.delete(user.getId());
-			//retval.setFlag(service.delete(user.getId()));
 			retval.setFlag(msg);
 			
 		} else {
@@ -160,52 +156,38 @@ public class MemberController {
 	}
 	@RequestMapping("/logout")
 	public String logout(SessionStatus status) {
-		logger.info("GO TO {}","LOGOUT");
 		status.setComplete();
-		logger.info("SESSION IS {}","CLEAR");
 		return "redirect:/";
 	}
 	@RequestMapping("/list/{pgNum}")
-	public String list(@PathVariable String pgNum,
+	public @ResponseBody HashMap<String,Object> list(@PathVariable String pgNum,
 			           Model model) {
-		logger.info("LIST PGNUM {}",pgNum);
 		int[] rows = new int[2];
 		int[] pages = new int[3];
+		HashMap<String,Object> map = new HashMap<String,Object>();
 		Retval r = service.count();
 		int totCount = r.getCount();
-		pages = this.getPages(totCount, Integer.parseInt(pgNum));
-		logger.info("TOT COUNT {}",totCount);
-		rows = Pagination.getStartRow(totCount, Integer.parseInt(pgNum), Values.PG_SIZE);
+		pages = Pagination.getPages(totCount, Integer.parseInt(pgNum));
+		rows = Pagination.getRows(totCount, Integer.parseInt(pgNum), Values.PG_SIZE);
 		command.setStart(rows[0]);
 		command.setEnd(rows[1]);
 		
-		model.addAttribute("list",service.list(command));
+		/*model.addAttribute("list",service.list(command));
 		model.addAttribute("pgSize",Values.PG_SIZE);
 		model.addAttribute("totCount",totCount);
 		model.addAttribute("totPg",pages[2]);
 		model.addAttribute("startPg",pages[0]);
 		model.addAttribute("pgNum",Integer.parseInt(pgNum));
-		model.addAttribute("lastPg",pages[1]);
-		return "admin:member/list.tiles";
-	}
-	public int[] getPages(int totCount,int pgNum2){
-		int[] pages = new int[3];
-		int startPg=0,lastPg=0,totPg=0;
-		if (totCount % Values.PG_SIZE == 0) {
-			totPg = totCount/Values.PG_SIZE;
-		}else{
-			totPg = totCount/Values.PG_SIZE + 1;
-		}
-		startPg = pgNum2-((pgNum2-1)%Values.PG_SIZE);
-		if (startPg + Values.PG_SIZE-1 <= totPg) {
-			lastPg = startPg + Values.PG_SIZE -1;
-		} else {
-			lastPg = totPg;
-		}
-		pages[0] = startPg;
-		pages[1] = lastPg;
-		pages[2] = totPg;
-		return pages;
+		model.addAttribute("lastPg",pages[1]);*/
+		map.put("list", service.list(command));
+		map.put("pgSize",Values.PG_SIZE);
+		map.put("totCount",totCount);
+		map.put("totPg",pages[2]);
+		map.put("startPg",pages[0]);
+		map.put("pgNum",Integer.parseInt(pgNum));
+		map.put("lastPg",pages[1]);
+		map.put("groupSize", Values.GROUP_SIZE);
+		return map;
 	}
 	@SuppressWarnings("unchecked")
 	@RequestMapping("/search")
@@ -215,9 +197,21 @@ public class MemberController {
 		logger.info("SEARCH keyField {}",keyField);		
 		logger.info("SEARCH keyword {}",keyword);		
 		List<MemberDTO> list = new ArrayList<MemberDTO>();
+		
 		command.setKeyField(keyField);
 		command.setKeyword(keyword);
 		list = (List<MemberDTO>) service.find(command);
+		int[] pages = new int[3];
+		int[] rows = new int[2];
+		int totCount = list.size();
+		pages = Pagination.getPages(totCount, 1);
+		rows = Pagination.getRows(totCount, 1, Values.PG_SIZE);
+		model.addAttribute("pgSize",Values.PG_SIZE);
+		model.addAttribute("totCount",totCount);
+		model.addAttribute("totPg",pages[2]);
+		model.addAttribute("startPg",pages[0]);
+		model.addAttribute("pgNum",1);
+		model.addAttribute("lastPg",pages[1]);
 		System.out.println(list);
 		model.addAttribute("list",list);
 		return "admin:member/list.tiles";

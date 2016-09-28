@@ -27,7 +27,7 @@ public class MemberServiceImpl implements MemberService{
 	}
 	@Override
 	public String open(MemberDTO stu) {
-		return (sqlSession.getMapper(MemberMapper.class).insert(member)==0)?"fail":"sucess";
+		return (sqlSession.getMapper(MemberMapper.class).insert(stu)==0)?"fail":"success";
 	}
 	@Override
 	public MemberDTO show() {
